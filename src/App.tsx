@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Container } from 'react-bootstrap'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import NewNote from './NewNote'
 
 function App() {
 
@@ -8,7 +9,7 @@ function App() {
     <Container className='my-4'>
       <Routes>
         <Route path='/' element={<div>Home</div>} />
-        <Route path='/new' element={<div>New</div>} />
+        <Route path='/new' element={<NewNote />} />
         <Route path='/:id'>
           <Route index element={<div>Show</div>}/>
           <Route path='edit' element={<div>Edit</div>}/>
