@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Badge, Button, Card, Col, Form, Row, Stack } from "react-bootstrap"
+import { Badge, Button, Card, Col, Form, Modal, ModalHeader, Row, Stack } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import ReactSelect from "react-select"
 import { Tag } from "./App"
@@ -13,13 +13,24 @@ type SimplifiedNote = {
 
 type NoteListProps = {
     availableTags: Tag[],
-    notes: SimplifiedNote[]
+    notes: SimplifiedNote[],
+    onUpdateTag: (id:string, label:string) => void,
+    onDeleteTag: (id: string) => void
 }
 
-function NoteList({ availableTags, notes}: NoteListProps) {
+type EditTagsProps = {
+    show: boolean,
+    availableTags: Tag[],
+    handleClose: () => void,
+    onUpdateTag: (id:string, label:string) => void,
+    onDeleteTag: (id: string) => void
+}
+
+function NoteList({ availableTags, notes, onUpdateTag, onDeleteTag}: NoteListProps) {
 
     const [selectedTags, setSelectedTags] = useState<Tag[]>([])
     const [title, setTitle] = useState("")
+    const [editTagsModalIsOpen, setEditTagsModalIsOpen] = useState(false)
 
     const filteredNotes = useMemo(() => {
         return notes.filter(note => {
@@ -37,7 +48,12 @@ function NoteList({ availableTags, notes}: NoteListProps) {
                     <Link to="/new">
                         <Button variant="primary">Create</Button>
                     </Link>
-                    <Button variant="outline-secondary">Edit Tags</Button>
+                    <Button 
+                        variant="outline-secondary"
+                        onClick={() => setEditTagsModalIsOpen(true)}
+                    >
+                        Edit Tags
+                    </Button>
                 </Stack>
             </Col>
         </Row>
@@ -84,6 +100,15 @@ function NoteList({ availableTags, notes}: NoteListProps) {
 
             }
         </Row>
+        <EditTagsModal 
+            availableTags={availableTags} 
+            show={editTagsModalIsOpen} 
+            handleClose={() => {
+                setEditTagsModalIsOpen(false)}
+            }
+            onDeleteTag={onDeleteTag}
+            onUpdateTag={onUpdateTag}
+        />
     </>
     
   )
@@ -105,6 +130,36 @@ function NoteCard({id, title, tags}: SimplifiedNote) {
                 </Stack>
             </Card.Body>
         </Card>
+    )
+}
+
+function EditTagsModal({availableTags, handleClose, show, onUpdateTag, onDeleteTag}: EditTagsProps) {
+    return (
+        <Modal show={show} onHide={handleClose}>
+            <ModalHeader closeButton>
+                <Modal.Title>Edit Tags</Modal.Title>
+            </ModalHeader>
+            <Modal.Body>
+                <Form>
+                    <Stack gap={2}>
+                        {availableTags.map(tag => (
+                            <Row key={tag.id}>
+                                <Col>
+                                    <Form.Control 
+                                        type="text" 
+                                        value={tag.label}
+                                        onChange={e => onUpdateTag(tag.id, e.target.value)}
+                                    />
+                                </Col>
+                                <Col xs="auto">
+                                    <Button variant="outline-danger" onClick={() => onDeleteTag(tag.id)}>&times;</Button>
+                                </Col>
+                            </Row>
+                        ))}
+                    </Stack>
+                </Form>
+            </Modal.Body>
+        </Modal>
     )
 }
 
